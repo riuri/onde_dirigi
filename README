@@ -1,0 +1,94 @@
+ONDE DIRIGI
+===========
+
+My dashboard camera overlays the coordinates in the recordings:
+┌───────────────────────────────────┐
+│    🌞                          🐠 │
+│          ╭────────────╮   🐝      │
+│   🚗 🚌  │ WELCOME TO │  🚗 🚓    │
+│ ═════════│    HERE    │══════════ │
+│ ───╥─────╰────────────╯───╥────── │
+│    ║  🌈   ╱ 🚘¦   ╲      ║       │
+│ 🬹🬹🭂🮽🭍🬹🭑🬭🬽 ╱🚔  ¦    ╲🭈🬭🭆🬹🭁🮽🭌🬹🬹🬹🬹🬹 │
+│  🯆🚶   🚸╱  🚖 ¦     ╲🌿🐄 🌿🦕   │
+│  🏨🚴🯅🐕╱      ¦      ╲  🌿🐄🌿🌿 │
+│                                   │
+│ 57 KM/H N27.27 W68.02    16:45:55 │
+└───────────────────────────────────┘
+And I wanna see it on a map.
+
+This is a personal project and may only work for few dash cam models.
+
+USAGE
+
+After compiling, call
+
+./parse_directory path/to/video/directory path/to/spatialite/database
+
+and open the database in QGIS (or other geographic software).
+
+The program will:
+* look for .TS videos in the directory,
+* read coordinates/timestamp from the frames,
+* validate those with simple rules, and
+* if passes, store in the SpatiaLite database.
+* The database is created if needed.
+
+
+COMPILING
+
+This uses the Meson Build system.
+
+To create and enter the build directory:
+
+meson setup build
+cd build/
+
+To compile the program:
+
+meson compile
+
+To test:
+
+meson test -v
+
+Some test cases depend on actual dash cam recordings.
+
+DEPENDENCIES
+
+FFmpeg: https://ffmpeg.org/
+SpatiaLite: https://www.gaia-gis.it/fossil/libspatialite
+
+To build:
+Meson Build system: https://mesonbuild.com/
+
+To view the database:
+QGIS: https://qgis.org/
+
+INTERNALS
+* Loading glyphs: glyph.h
+  The glyphs are loaded from a PNG file.
+
+* Parsing video frames to strings: video_data.h
+  At specific positions of the frame, it will multiply brightness values against
+  the glyphs and look for a high value.
+
+* Interpreting strings: output_data.h
+  It will interpret, then either validate or write the data to a SpatiaLite
+  database. The validation is with pretty simple rules, see tests for more info.
+
+* Writing data to database: db.h
+  Some routines to separate generic database operations from the rest of the
+  project.
+
+* Listing videos: ls.h
+  It will look for *.TS videos on specific subdirectories according to the dash
+  cam output and avoiding already double-processing videos.
+
+* Tests use the test anything protocol (TAP, https://testanything.org) for
+  subtests. Some custom assertions for the test anything protocol (TAP) are in
+  test/my_assert.h.
+
+* Private data (used in some tests) was not included in the repository. The
+  corresponding tests will be skipped when data is not available (checked at the
+  meson level).
